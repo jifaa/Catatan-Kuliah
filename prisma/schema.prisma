@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Semester {
+  id        String    @id @default(cuid())
+  name      String
+  startDate DateTime?
+  endDate   DateTime?
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  subjects  Subject[]
+}
+
+model Subject {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  semesterId  String
+  semester    Semester   @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  order       Int        @default(0)
+  pinned      Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  materials   Material[]
+  notes       SubjectNote[]
+  tasks       Task[]
+  schedules   ClassSchedule[]
+  attachments Attachment[]
+}
+
+model ClassSchedule {
+  id        String   @id @default(cuid())
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  room      String?
+  className String?
+  lecturer  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([subjectId, dayOfWeek, startTime])
+  @@index([dayOfWeek, startTime])
+}
+
+model SubjectNote {
+  id        String   @id @default(cuid())
+  title     String?
+  content   String   @default("")
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  pinned    Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Material {
+  id          String       @id @default(cuid())
+  title       String?
+  meetingNumber Int
+  content     String       @default("")
+  subjectId   String
+  subject     Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  pinned      Boolean      @default(false)
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  attachments Attachment[]
+  tags        Tag[]
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  deadline    DateTime?
+  status      String       @default("TODO")
+  subjectId   String
+  subject     Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  attachments Attachment[]
+  tags        Tag[]
+}
+
+model Tag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  color     String     @default("#6366f1")
+  materials Material[]
+  tasks     Task[]
+}
+
+model Attachment {
+  id         String    @id @default(cuid())
+  fileName   String
+  filePath   String
+  fileSize   Int
+  fileType   String
+  displayName String?
+  description String?
+  tags        String?
+  materialId String?
+  material   Material? @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  taskId     String?
+  task       Task?     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  subjectId  String?
+  subject    Subject?  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+}
