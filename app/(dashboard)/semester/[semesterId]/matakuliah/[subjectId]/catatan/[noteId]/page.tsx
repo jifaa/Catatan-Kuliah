@@ -24,7 +24,7 @@ export default function SubjectNoteEditorPage({
   const { semesterId, subjectId, noteId } = use(params);
   const [note, setNote] = useState<SubjectNoteDetail | null>(null);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState<string | Record<string, unknown>>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

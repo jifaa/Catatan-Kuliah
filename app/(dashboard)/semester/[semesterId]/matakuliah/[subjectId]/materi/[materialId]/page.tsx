@@ -27,7 +27,7 @@ export default function MaterialEditorPage({
   const { semesterId, subjectId, materialId } = use(params);
   const [material, setMaterial] = useState<MaterialDetail | null>(null);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState<string | Record<string, unknown>>("");
   const [tags, setTags] = useState<TagData[]>([]);
   const [attachments, setAttachments] = useState<AttachmentData[]>([]);
   const [loading, setLoading] = useState(true);
