@@ -21,9 +21,13 @@ import { useSidebarStore } from "@/store/sidebar-store";
 import { cn } from "@/lib/utils";
 import type { SidebarSemester } from "@/types";
 
-export function Sidebar() {
+interface SidebarProps {
+  isMobile?: boolean;
+}
+
+export function Sidebar({ isMobile = false }: SidebarProps) {
   const pathname = usePathname();
-  const { isCollapsed, toggle, expandedSemesters, toggleSemester } = useSidebarStore();
+  const { isCollapsed, toggle, expandedSemesters, toggleSemester, setMobileOpen } = useSidebarStore();
   const [semesters, setSemesters] = useState<SidebarSemester[]>([]);
 
   useEffect(() => {
@@ -33,6 +37,12 @@ export function Sidebar() {
       .catch(() => {});
   }, [pathname]);
 
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setMobileOpen(false);
+    }
+  };
+
   const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/semester", label: "Semester", icon: GraduationCap },
@@ -40,33 +50,43 @@ export function Sidebar() {
     { href: "/search", label: "Pencarian", icon: Search },
   ];
 
+  const effectiveCollapsed = isMobile ? false : isCollapsed;
+
   return (
     <aside
       className={cn(
-        "hidden md:flex flex-col border-r border-border bg-sidebar h-screen sticky top-0 transition-all duration-300 ease-in-out z-30",
-        isCollapsed ? "w-16" : "w-64"
+        "flex flex-col border-r border-border bg-sidebar transition-all duration-300 ease-in-out z-30",
+        isMobile
+          ? "w-full h-full border-r-0"
+          : cn("hidden md:flex h-screen sticky top-0", effectiveCollapsed ? "w-16" : "w-64")
       )}
     >
       {/* Header */}
       <div className="flex items-center h-14 px-3 border-b border-border">
-        {!isCollapsed && (
-          <Link href="/" className="flex items-center gap-2 font-semibold text-sm flex-1">
+        {(!effectiveCollapsed || isMobile) && (
+          <Link
+            href="/"
+            onClick={handleLinkClick}
+            className="flex items-center gap-2 font-semibold text-sm flex-1"
+          >
             <BookOpen className="h-5 w-5 text-primary" />
             <span>Catatan Kuliah</span>
           </Link>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggle}
-          className="h-8 w-8 shrink-0 cursor-pointer"
-        >
-          {isCollapsed ? (
-            <PanelLeft className="h-4 w-4" />
-          ) : (
-            <PanelLeftClose className="h-4 w-4" />
-          )}
-        </Button>
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggle}
+            className="h-8 w-8 shrink-0 cursor-pointer"
+          >
+            {effectiveCollapsed ? (
+              <PanelLeft className="h-4 w-4" />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" />
+            )}
+          </Button>
+        )}
       </div>
 
       <ScrollArea className="flex-1 py-2">
@@ -76,21 +96,22 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={handleLinkClick}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors hover:bg-accent",
                 pathname === item.href
                   ? "bg-accent text-accent-foreground font-medium"
                   : "text-muted-foreground",
-                isCollapsed && "justify-center px-2"
+                effectiveCollapsed && "justify-center px-2"
               )}
             >
               <item.icon className="h-4 w-4 shrink-0" />
-              {!isCollapsed && <span>{item.label}</span>}
+              {!effectiveCollapsed && <span>{item.label}</span>}
             </Link>
           ))}
         </div>
 
-        {!isCollapsed && (
+        {!effectiveCollapsed && (
           <>
             <Separator className="my-3" />
 
@@ -100,7 +121,7 @@ export function Sidebar() {
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Semester
                 </span>
-                <Link href="/semester">
+                <Link href="/semester" onClick={handleLinkClick}>
                   <Button variant="ghost" size="icon" className="h-5 w-5 cursor-pointer">
                     <Plus className="h-3 w-3" />
                   </Button>
@@ -112,6 +133,7 @@ export function Sidebar() {
                     <div className="group flex items-center gap-1">
                       <Link
                         href={`/semester/${semester.id}`}
+                        onClick={handleLinkClick}
                         className={cn(
                           "flex items-center gap-2 min-w-0 flex-1 px-3 py-1.5 rounded-md text-sm transition-colors hover:bg-accent",
                           pathname.startsWith(`/semester/${semester.id}`)
@@ -123,7 +145,7 @@ export function Sidebar() {
                         <span className="truncate">{semester.name}</span>
                       </Link>
 
-                      <Link href={`/semester/${semester.id}`}>
+                      <Link href={`/semester/${semester.id}`} onClick={handleLinkClick}>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -156,6 +178,7 @@ export function Sidebar() {
                           <Link
                             key={subject.id}
                             href={`/semester/${semester.id}/matakuliah/${subject.id}`}
+                            onClick={handleLinkClick}
                             className={cn(
                               "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors hover:bg-accent",
                               pathname.includes(subject.id)

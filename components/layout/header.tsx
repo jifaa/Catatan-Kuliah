@@ -40,6 +40,7 @@ export function Header() {
         size="icon"
         className="md:hidden h-9 w-9 mr-2 cursor-pointer"
         onClick={toggleMobile}
+        aria-label="Buka menu navigasi"
       >
         <Menu className="h-5 w-5" />
       </Button>

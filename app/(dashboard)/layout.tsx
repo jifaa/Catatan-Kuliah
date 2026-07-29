@@ -2,9 +2,8 @@
 
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useSidebarStore } from "@/store/sidebar-store";
-import { Sidebar as MobileSidebar } from "@/components/layout/sidebar";
 
 export default function DashboardLayout({
   children,
@@ -21,7 +20,8 @@ export default function DashboardLayout({
       {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="p-0 w-64">
-          <MobileSidebar />
+          <SheetTitle className="sr-only">Navigasi Utama</SheetTitle>
+          <Sidebar isMobile />
         </SheetContent>
       </Sheet>
 
